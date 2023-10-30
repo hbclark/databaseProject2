@@ -6,13 +6,6 @@ include(SHARED_PATH . '/header.php');
 ?>
 
 <main>
-
-<?php 
-
-echo $_SERVER['SCRIPT_NAME'].'<br>';
-echo dirname(__FILE__);
-?>
-
 <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method='post' class='login'>
   <div class="form-group">
     <label for="username">Username</label>

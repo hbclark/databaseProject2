@@ -2,59 +2,60 @@
 require_once('../../private/initialize.php');
 include(SHARED_PATH . '/header.php');
 
-
-
 $id=(int)$_GET['id'];
-
-$selectSql = "select cabinType,cabinDescription,pricePerNight,pricePerWeek,photo from cabin where cabinId = $id";
-
-// make query to get results
-$selectResult = mysqli_query($con,$selectSql);
-
-//fetch the resulting rows as an array
-$cabin = mysqli_fetch_array($selectResult,MYSQLI_ASSOC);
-
-// echo "<pre>";
-// print_r($cabin);
-// echo "</pre>";
-
 
 ?>
 <?php 
 if(isset($_POST['submit'])){
 // validate inputted data
-  $cabinType = $_POST['cabinType'];
-  $cabinDescription = $_POST['cabinDescription'];
-  $pricePerNight = $_POST['pricePerNight'];
-  $pricePerWeek = $_POST['pricePerWeek'];
-  $photo = $_POST['photo'];
+  $cabin=[];
+  $cabin['cabinId'] = $id;
+  $cabin['cabinType'] = $_POST['cabinType'];
+  $cabin['cabinDescription'] = $_POST['cabinDescription'];
+  $cabin['pricePerNight'] = (int)$_POST['pricePerNight'];
+  $cabin['pricePerWeek'] = (int)$_POST['pricePerWeek'];
+  $cabin['photo'] = $_POST['photo']?$_POST['photo']:'testCabin.jpg';
   $errors = [];
 
-  if($pricePerWeek<$pricePerNight){
-    $errors[] = "pricePerWeek must be greater than pricePerNight";
-  }
-  if(empty($cabinType)){
+  // check if cabinType is empty
+  if(empty($cabin['cabinType'])){
     $errors[] = "cabinType is required";
   }
-  if(empty($cabinDescription)){
+  // check if cabinDescription is empty
+  if(empty($cabin['cabinDescription'])){
     $errors[] = "cabinDescription is required";
   }
-  if(empty($pricePerNight)){
-    $errors[] = "pricePerNight is required";
+
+  // check if price per night is empty and must be positive
+  if(empty($cabin['pricePerNight'])){
+    $errors[] = "pricePerNight is required and must be positive";
+  }elseif($cabin['pricePerNight']<0){
+    $errors[] ='pricePerNight must be positive!';
   }
-  if(empty($pricePerWeek)){
+
+  //check if pricePerWeek is empty and not more than 5 times the price per night.
+  if(empty($cabin['pricePerWeek'])){
     $errors[] = "pricePerWeek is required";
+  }elseif(($cabin['pricePerNight']*5)<$cabin['pricePerWeek']){
+    $errors[]='Price per week is not more than 5 times the price per night';
   }
-  if(empty($photo)){
-    $errors[] = "photo is required";
-  }
+
+  
   if(!empty($errors)){
     foreach($errors as $error){
       echo "<p class='error'>$error</p>";
     }
   }else{
     // update cabin
-    $updateSql = "update cabin set cabinType='$cabinType',cabinDescription='$cabinDescription',pricePerNight='$pricePerNight',pricePerWeek='$pricePerWeek',photo='$photo' where cabinId=$id";
+    
+    $updateSql = "UPDATE cabin SET ";
+    $updateSql .= "cabinType='" . mysqli_real_escape_string($con, $cabin['cabinType']) . "', ";
+    $updateSql .= "cabinDescription='" . mysqli_real_escape_string($con, $cabin['cabinDescription']) . "', ";
+    $updateSql .= "pricePerNight='" . mysqli_real_escape_string($con, $cabin['pricePerNight']) . "', ";
+    $updateSql .= "pricePerWeek='" . mysqli_real_escape_string($con, $cabin['pricePerWeek']) . "', ";
+    $updateSql .= "photo='" . mysqli_real_escape_string($con, $cabin['photo']) . "' ";
+    $updateSql .= "WHERE cabinId='" . mysqli_real_escape_string($con, $cabin['cabinId']) . "' ";
+    $updateSql .= "LIMIT 1";   
     $updateResult = mysqli_query($con,$updateSql);
     if($updateResult){
       header("Location:modifyCabin.php");
@@ -64,7 +65,16 @@ if(isset($_POST['submit'])){
   }
 
   
+}else{
+  $selectSql = "select cabinType,cabinDescription,pricePerNight,pricePerWeek,photo from cabin where cabinId = $id";
+
+// make query to get results
+$selectResult = mysqli_query($con,$selectSql);
+
+//fetch the resulting rows as an array
+$cabin = mysqli_fetch_array($selectResult,MYSQLI_ASSOC);
 }
+
 ?>
 <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>?id=<?php echo htmlspecialchars($id)?>"  method='post' class='updateCabin'>
 <h2>Update Cabin</h2>
@@ -72,7 +82,7 @@ if(isset($_POST['submit'])){
 
 <div class="form-group">
   <label for="cabinType">cabinType</label>
-  <input type="text" name="cabinType" id="cabinType" class='form-control' value="<?php echo htmlspecialchars($cabin['cabinType'])?>">
+  <input type="text" name="cabinType" id="cabinType" class='form-control' value="<?php echo htmlspecialchars($cabin['cabinType']);?>">
 </div>
 <div class="form-group">
   <label for="cabinDescription" style="vertical-align:top">cabinDescription</label>

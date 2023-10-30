@@ -12,7 +12,7 @@
 <div id="wrapper">
 <header>
     <h1>  
-    <a href="allCabins.php" ><img src= "<?php echo url_for('/cabins/images/accommodation.png')?>"   alt='SunnySpot Accommodation Logo'></a>   SunnySpot Accommodation
+    <a href="<?php echo url_for('/cabins/allCabins.php') ?>" ><img src= "<?php echo url_for('/cabins/images/accommodation.png')?>"   alt='SunnySpot Accommodation Logo'></a>   SunnySpot Accommodation
      <span>🌴</span> </h1>
 </header>
 
